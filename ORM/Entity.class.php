@@ -1,11 +1,20 @@
 ﻿<?php
 abstract class Entity implements IDAO {
 	
+	protected $_id;
 	protected $_tablename;
 	protected $_classename;
 	
 	 public function Entity(array $params=null){
 
+	 }
+	 
+	 public function getId(){
+	 	return $this->_id;
+	 }
+	 
+	 public function setId($unid){
+	 	$this->_id=$unid;
 	 }
 	 
 	 protected function lierDB($classname, $tablename){
@@ -68,6 +77,25 @@ abstract class Entity implements IDAO {
 	 	
 	 	return $jeu["nb"];
 	 	
+	 }
+	 
+	 public function NewId(){
+	 	$db=Database::getInstance();
+	 	 
+	 	$tablename=$this->_tablename;
+	 	$classe=$this->_classename;
+	 	 
+	 	$req="SELECT Max(id) as max FROM ".$tablename;
+	 	 
+	 	//var_dump($req);
+	 	 
+	 	$stmt = $db->prepare($req);
+	 	$stmt->execute();
+	 	 
+	 	$jeu=$stmt->fetch(PDO::FETCH_ASSOC);
+	 	 
+	 	return $jeu["max"]+1;
+	 	 
 	 }
 	
 	
@@ -198,6 +226,24 @@ abstract class Entity implements IDAO {
 
 	}
 	
+	public function Remove(){
+		
+		$db=Database::getInstance();
+		
+		//var_dump($db);
+		
+		$tablename=$this->_tablename;
+		$classe=$this->_classename;
+		
+		$req="DELETE FROM $tablename WHERE id=".$this->_id ;
+		
+		var_dump($req);
+		
+		$stmt = $db->prepare($req);
+		$stmt->execute();
+		
+	}
+	
 	/*
 	 * TO DO
 	 * 
@@ -236,7 +282,7 @@ abstract class Entity implements IDAO {
 			$req=substr($req,0,-2);
 			$req.=" WHERE id=".$this->getId();
 			
-			//var_dump($req);
+			var_dump($req);
 			
 			try {
 				$stmt = $db->prepare($req);
@@ -253,6 +299,7 @@ abstract class Entity implements IDAO {
 			$req="INSERT INTO $this->_tablename
 				  VALUES (" ;
 			
+			//var_dump($lesmethodes);
 
 			foreach($lesmethodes as $reflexionobjet){
 					
@@ -271,7 +318,7 @@ abstract class Entity implements IDAO {
 			$req=substr($req,0,-1);
 			$req.=")";
 			
-			//var_dump($req);
+			var_dump($req);
 			
 			try {
 				$stmt = $db->prepare($req);
