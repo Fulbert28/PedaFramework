@@ -60,13 +60,19 @@ abstract class Entity implements IDAO {
 	 	
 	 }
 	 
-	 public function Count(){
+	 protected function Columns(){
+	 	return $this->getColumns($this->_tablename);
+	 }
+	 
+	 public function Count($lecritere=null){
 	 	$db=Database::getInstance();
 	 	
 	 	$tablename=$this->_tablename;
 	 	$classe=$this->_classename;
 	 	
 	 	$req="SELECT Count(*) as nb FROM ".$tablename;
+	 	
+	 	if(!is_null($lecritere)) $req.=" WHERE ".$lecritere;
 	 	
 	 	//var_dump($req);
 	 	
@@ -99,7 +105,7 @@ abstract class Entity implements IDAO {
 	 }
 	
 	
-	public function LoadAll($debutliste=null, $nbenr=null) {
+	public function LoadAll($debutliste=null, $nbenr=null, $tri=0, $sens='ASC') {
 		$db=Database::getInstance();
 		
 		//var_dump($db);
@@ -107,11 +113,14 @@ abstract class Entity implements IDAO {
 		$tablename=$this->_tablename;
 		$classe=$this->_classename;
 		
+		$req="SELECT * FROM $tablename";
+
+		$tri++;
+		$req.=" ORDER BY $tri $sens";
+		
+		//gestion de la limite
 		if(!is_null($debutliste)&&!is_null($nbenr)){
-			$req="SELECT * FROM $tablename LIMIT $debutliste,$nbenr";
-		}
-		else{
-			$req="SELECT * FROM ".$tablename;
+			$req.=" LIMIT $debutliste,$nbenr";
 		}
 		
 		//var_dump($req);
@@ -157,7 +166,7 @@ abstract class Entity implements IDAO {
 		return $lesobjets;
 	}
 	
-	public function LoadByCritere($critere) {
+	public function LoadByCritere($critere, $debutliste=null, $nbenr=null, $tri=0, $sens='ASC') {
 		$db=Database::getInstance();
 	
 		//var_dump($db);
@@ -166,6 +175,14 @@ abstract class Entity implements IDAO {
 		$classe=$this->_classename;
 	
 		$req="SELECT * FROM $tablename WHERE $critere" ;
+		
+		$tri++;
+		$req.=" ORDER BY $tri $sens";
+		
+		//gestion de la limite
+		if(!is_null($debutliste)&&!is_null($nbenr)){
+			$req.=" LIMIT $debutliste,$nbenr";
+		}
 	
 		//var_dump($req);
 	
@@ -282,7 +299,7 @@ abstract class Entity implements IDAO {
 			$req=substr($req,0,-2);
 			$req.=" WHERE id=".$this->getId();
 			
-			var_dump($req);
+			//var_dump($req);
 			
 			try {
 				$stmt = $db->prepare($req);
@@ -318,7 +335,7 @@ abstract class Entity implements IDAO {
 			$req=substr($req,0,-1);
 			$req.=")";
 			
-			var_dump($req);
+			//var_dump($req);
 			
 			try {
 				$stmt = $db->prepare($req);
