@@ -1,6 +1,6 @@
 <?php
 class EntityFactory extends Entity{
-	
+		
 	public function EntityFactory($tablename,$classname) {
 		$this->lierDB($classname,$tablename);
 	}
@@ -12,19 +12,52 @@ class EntityFactory extends Entity{
 	public function generateClasse(){
 		
 		$nomclass=$this->_classename;
+		$tablename=$this->_tablename;
 		
 		$txt="<?php \n class $nomclass extends Entity{\n";
 		
+	 		$txt.="\t".$this->generateConstructeur($nomclass,$tablename)."\n";
+	
 			$txt.="\t".$this->generateAttributes()."\n";
 			$txt.="\t".$this->generateGetteurs()."\n";
 			$txt.="\t".$this->generateSetteurs()."\n";
+	
 			
 		$txt.="} ?>";
 		
 		return $txt;
 	}
 	
-	public function generateAttributes(){
+	private function generateConstructeur($classname, $tablename){
+		$colonnes=$this->getLesColonnes();
+		
+		$txt="\n";
+		$txt.="\t //Constructeur \n";
+		$txt.="\n";
+		
+		$txt.="\t public function $this->_classename(array \$params=null){\n";
+		
+		$txt.="\t\t\$this->lierDB(\"$classname\",\"$tablename\");\n";
+		
+			$txt.="\t\t if(isset(\$params)){\n";
+			
+			$colonnes=$this->getLesColonnes();
+			$i=0;
+			foreach ($colonnes->getAll() as $unecolonne){
+				
+				$txt.="\t\t\t \$this->_$unecolonne=\$params[$i];\n";
+				$i++;
+			}
+			
+			$txt.="\t\t}\n";
+		
+		$txt.="\t}\n\n";
+		
+		return $txt;
+	}
+	
+	
+	private function generateAttributes(){
 		$colonnes=$this->getLesColonnes();
 		
 		$txt="\n";
@@ -40,7 +73,7 @@ class EntityFactory extends Entity{
 		return $txt;
 	}
 	
-	public function generateGetteurs(){
+	private function generateGetteurs(){
 		
 		$colonnes=$this->getLesColonnes();
 				
@@ -63,7 +96,7 @@ class EntityFactory extends Entity{
 		return $txt;
 	}
 	
-	public function generateSetteurs(){
+	private function generateSetteurs(){
 		
 		$colonnes=$this->getLesColonnes();
 		

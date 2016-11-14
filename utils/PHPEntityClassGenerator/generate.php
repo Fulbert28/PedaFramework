@@ -16,7 +16,7 @@ $nomscript = $argv[0];
 
 //echo "nombre de parametres : ".count($argv);
 
-if(count($argv)<4){
+if(count($argv)<2){
 	echo "\n"."usage : $nomscript tablename [classname] \n";
 	echo "\t tablename: correspond au nom de la table \n";
 	echo "\t classname: nom de la classe genere \n";
@@ -28,7 +28,13 @@ else{
 
 	$nomtable  = $argv[1];
 	$nomclasse  = $argv[2];
-	$path  = $argv[3];
+	
+	if(isset($argv[3])){
+		$path=$argv[3];
+	}
+	else{
+		$path=null;
+	}
 
 /*	echo "Nom du script $nomscript \n";
 	echo "Nom de la table $nomtable \n";
