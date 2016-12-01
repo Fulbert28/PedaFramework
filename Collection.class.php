@@ -1,10 +1,12 @@
 <?php
+namespace Fulbert\PedaFramework;
+
 class Collection{
 
 	private $colObjet;
 	private $compteur;
 
-	public function Collection(){
+	public function __construct(){
 		$this->colObjet=array();
 		$this->compteur=0;
 	}

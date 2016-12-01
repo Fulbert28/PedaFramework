@@ -1,11 +1,13 @@
 <?php
+namespace Fulbert\PedaFramework\MVC;
+
 class Application {
 	
 	private static $_layout;
 	
-	public static function getController($name,$action=null, $params=null){
+	public static function getController($namespace,$name,$action=null, $params=null){
 		
-		$mycontroller=ControllerFactory::create($name,$action,$params);
+		$mycontroller=ControllerFactory::create($namespace,$name,$action,$params);
 		
 		return $mycontroller;
 	}

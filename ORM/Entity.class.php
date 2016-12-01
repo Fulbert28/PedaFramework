@@ -1,11 +1,25 @@
-﻿<?php
+<?php
+namespace Fulbert\PedaFramework\ORM;
+
+use PDO;
+use ReflectionObject;
+//use ReflectionMethod;
+
+use Fulbert\PedaFramework\Collection;
+
+//use Fulbert\Stages\Models\Entreprise;
+//use Fulbert\Stages\Models\Professeur;
+//use Fulbert\Stages\Models\Etudiant;
+
+//use Fulbert\Librairie\User;
+
 abstract class Entity implements IDAO {
 	
 	protected $_id;
 	protected $_tablename;
 	protected $_classename;
 	
-	 public function Entity(array $params=null){
+	 public function __construct(array $params=null){
 
 	 }
 	 
@@ -17,9 +31,9 @@ abstract class Entity implements IDAO {
 	 	$this->_id=$unid;
 	 }
 	 
-	 protected function lierDB($classname, $tablename){
+	 protected function lierDB($namespacemodel, $classname, $tablename){
 	 	$this->_tablename=$tablename;
-	 	$this->_classename=$classname;
+	 	$this->_classename=$namespacemodel.'\\'.$classname;
 	 }
 	 	 
 	 private function exist($id){
@@ -173,6 +187,8 @@ abstract class Entity implements IDAO {
 	
 		$tablename=$this->_tablename;
 		$classe=$this->_classename;
+		
+		//var_dump($classe);
 	
 		$req="SELECT * FROM $tablename WHERE $critere" ;
 		
@@ -188,6 +204,8 @@ abstract class Entity implements IDAO {
 	
 		$stmt = $db->prepare($req);
 		$stmt->execute();
+		
+		//var_dump($stmt);
 	
 		$lesobjets=new Collection();
 		/*
@@ -195,6 +213,7 @@ abstract class Entity implements IDAO {
 		*/
 		while ($jeuenregistrement = $stmt->fetch(PDO::FETCH_ASSOC)) {
 	
+			//var_dump($jeuenregistrement);
 			/*
 			 * Creation d'une collection de valeurs de champ
 			*/
@@ -205,6 +224,7 @@ abstract class Entity implements IDAO {
 			*/
 			foreach($jeuenregistrement as $champ => $valeur){
 				//On stocke la valeur dans la collection
+				//var_dump($valeur);
 				$params->add($valeur);
 			}
 				
@@ -243,6 +263,19 @@ abstract class Entity implements IDAO {
 
 	}
 	
+	public function LoadOneByCritere($critere){
+	
+		$lesobjets=$this->LoadByCritere($critere);
+	
+		if($lesobjets->Cardinal()==1){
+			return $lesobjets->getElementAtIndex(0);
+		}
+		else{
+			return null;
+		}
+	
+	}
+	
 	public function Remove(){
 		
 		$db=Database::getInstance();
@@ -267,17 +300,25 @@ abstract class Entity implements IDAO {
 	 * A finir d'implémenter correctement (gestion de l'update ou du insert)
 	 * Pour l'instant seulement l'Insert est implémenté
 	 */
-	public function Save(){
+	public function Save($laclassemere=null){
 		
 		$reflection = new ReflectionObject($this);
+		
+		//$laclasse=$reflection->getParentClass()->getParentClass();
+		
+		//var_dump($laclasse);
+		
 		$lesmethodes=$reflection->getMethods();
 		//var_dump($lesmethodes);
 		
 		$db=Database::getInstance();
 		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
+		//var_dump($this);
+		
 		if($this->exist($this->getId())){
 			//pour l'update
+
 			$lescolonnes=$this->getColumns($this->_tablename);
 						
 			$req="UPDATE $this->_tablename SET ";
@@ -285,16 +326,45 @@ abstract class Entity implements IDAO {
 			$colonneid=1;
 			foreach($lesmethodes as $reflexionobjet){
 				
-				$lamethode=$reflexionobjet->getName();
+				//var_dump($reflexionobjet->class);
 				
-				if($reflexionobjet->isPublic() && substr($lamethode, 0,3)=="get" && $lamethode!="getId"){
-					$legetteur=$reflexionobjet->getName();
+				//var_dump($laclasse->name);
+				
+				//print_r("comparaison");
+				//var_dump($reflexionobjet->class==$laclasse->name);
+				
+				if(!is_null($laclassemere)){
+					if($reflexionobjet->class==$laclassemere->name){
+						$recupgetteur=true;
+					}
+					else{
+						$recupgetteur=false;
+					}
+				}
+				else{
+					$recupgetteur=true;
+				}
+				
+
+					$lamethode=$reflexionobjet->getName();
 					
-					$unecolonne=$lescolonnes->getElementAtIndex($colonneid);
-					$req.="$unecolonne='".$this->$legetteur()."', ";
-					
-					$colonneid++;
-				}	
+					if($recupgetteur && $reflexionobjet->isPublic() && substr($lamethode, 0,3)=="get" && $lamethode!="getId"){
+							
+						$legetteur=$reflexionobjet->getName();
+							
+						$unecolonne=$lescolonnes->getElementAtIndex($colonneid);
+						
+						//$data[]['colonne']=$unecolonne;
+						//$data[]['legetteur']=$legetteur;
+						//$data[]['valeur associ�e']=$this->$legetteur();
+						
+						//var_dump($data);
+						
+						$req.="$unecolonne='".$this->$legetteur()."', ";
+							
+							
+						$colonneid++;
+					}
 			}
 			$req=substr($req,0,-2);
 			$req.=" WHERE id=".$this->getId();
@@ -312,7 +382,6 @@ abstract class Entity implements IDAO {
 		}
 		else{
 			//c'est un insert
-			
 			$req="INSERT INTO $this->_tablename
 				  VALUES (" ;
 			
@@ -348,7 +417,6 @@ abstract class Entity implements IDAO {
 		}
 		
 	}
-	
 }
 
 ?>

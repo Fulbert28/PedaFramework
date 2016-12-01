@@ -1,4 +1,6 @@
 <?php
+namespace Fulbert\PedaFramework\MVC;
+
 class Controller {
 	
 	protected $_data;
@@ -6,7 +8,7 @@ class Controller {
 	protected $_action;
 	protected $_params;
 	
-	public function Controller($controllerName=null, $action=null, $params=null){
+	public function __construct($controllerName=null, $action=null, $params=null){
 		
 			$this->_name=$controllerName;
 			$this->_params=$params;

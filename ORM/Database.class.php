@@ -1,4 +1,7 @@
 <?php
+namespace Fulbert\PedaFramework\ORM;
+use PDO;
+
 class Database {
 	
 	private static $_maconnexion;

@@ -1,4 +1,6 @@
 <?php
+namespace Fulbert\PedaFramework\ORM;
+
 interface IDAO {
 	
 	public function LoadAll();

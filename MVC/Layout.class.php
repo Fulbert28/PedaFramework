@@ -1,10 +1,12 @@
 <?php
+namespace Fulbert\PedaFramework\MVC;
+
 class Layout {
 	
 	private $_file;
 	private $_name;
 	
-	public function Layout($name){
+	public function __construct($name){
 		
 		$folder="layouts";
 		$this->_name=$name;
